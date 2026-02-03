@@ -1,126 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Manager</title>
-
+    <title>Post & Comment Manager</title>
     <script src="script.js"></script>
 
     <style>
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 20px;
         }
 
         .container {
             max-width: 800px;
             margin: auto;
             background: #fff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 6px;
         }
 
-        h2 {
+        h2,
+        h3 {
             text-align: center;
-            margin-bottom: 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
-        table thead {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        table th, table td {
-            padding: 10px;
-            border: 1px solid #ddd;
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
             text-align: center;
         }
 
-        table tbody tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        .form {
-            margin-top: 25px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .form input[type="text"] {
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        .form input[type="submit"] {
-            grid-column: span 3;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: #28a745;
+        th {
+            background: #007bff;
             color: #fff;
-            font-size: 16px;
+        }
+
+        .deleted-post {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .form,
+        .comments {
+            margin-top: 20px;
+        }
+
+        input {
+            padding: 6px;
+            margin: 4px 0;
+            width: 100%;
+        }
+
+        button {
+            padding: 6px 10px;
+            margin-top: 6px;
             cursor: pointer;
-        }
-
-        .form input[type="submit"]:hover {
-            background-color: #218838;
-        }
-
-        .deleted {
-            margin-top: 30px;
-        }
-
-        .deleted-title {
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        #list_delete {
-            color: #dc3545;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
+
         <h2>Post Management</h2>
 
+        <!-- POSTS -->
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Title</th>
                     <th>Views</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                 </tr>
             </thead>
-            <tbody id="body_table">
-            </tbody>
+            <tbody id="body_table"></tbody>
         </table>
 
-        <div class="deleted">
-            <div class="deleted-title">Danh sách đã xóa:</div>
-            <ul id="list_delete"></ul>
-        </div>
-
+        <!-- POST FORM -->
         <div class="form">
-            <input type="text" id="id_txt" placeholder="ID">
+            <h3>Thêm / Sửa Post</h3>
+            <input type="text" id="id_txt" placeholder="ID (tự sinh)" readonly>
             <input type="text" id="title_txt" placeholder="Title">
             <input type="text" id="view_txt" placeholder="Views">
-            <input type="submit" value="Save" onclick="Save()">
+            <button onclick="Save()">Save Post</button>
         </div>
+
+        <!-- COMMENTS -->
+        <div class="comments">
+            <h3>Comment</h3>
+
+            <input type="text" id="comment_postId" placeholder="Post ID">
+            <input type="text" id="comment_text" placeholder="Nội dung comment">
+            <button onclick="addCommentFromUI()">Add Comment</button>
+
+            <h4>Danh sách comment</h4>
+            <div id="comment_list"></div>
+        </div>
+
     </div>
 </body>
+
 </html>

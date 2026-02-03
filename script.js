@@ -1,6 +1,8 @@
 let posts;
+let comments = [];
+let currentPostId = null;
 
-async function LoadData() {
+async function LoadData() { 
     let res = await fetch("http://localhost:3000/posts")
     posts = await res.json();
     let body = document.getElementById("body_table");
@@ -12,14 +14,23 @@ async function LoadData() {
             <td>${post.id}</td>
             <td>${post.title}</td>
             <td>${post.views}</td>
-           <td><input type="submit" value="Delete" onclick="Delete(${post.id})"/></td>
+           <td>
+                <input type="submit" value="Delete" onclick="Delete(${post.id})"/>
+                <input type="submit" value="Comments" onclick="loadComments('${post.id}')"/>
+            </td>
         </tr>`
     }
     let dataDelete = posts.filter(post => post.isDeleted === true);
-    listDelete.innerHTML = '';
     for (const post of dataDelete) {
-        listDelete.innerHTML += `<p>${post.id} - ${post.title} - ${post.views} views<br/>`
+        body.innerHTML += `
+        <tr class="deleted-post">
+            <td>${post.id}</td>
+            <td>${post.title}</td>
+            <td>${post.views}</td>
+            <td>Đã xóa</td>
+        </tr>`;
     }
+
 }
 async function Save() {
     let id = document.getElementById("id_txt").value;
@@ -103,3 +114,104 @@ async function Delete(id) {
     return false;
 }
 LoadData();
+
+
+async function loadComments(postId) {
+    currentPostId = postId;
+    let res = await fetch(`http://localhost:3000/comments?postId=${postId}`);
+    comments = await res.json();
+
+    let commentDiv = document.getElementById("comment_list");
+    if (!commentDiv) return;
+
+    commentDiv.innerHTML = "";
+
+    comments
+        .filter(c => c.isDeleted === false)
+        .forEach(c => {
+            commentDiv.innerHTML += `
+                <div>
+                    ${c.text}
+                    <button onclick="editComment('${c.id}')">Edit</button>
+                    <button onclick="deleteComment('${c.id}')">Delete</button>
+                </div>
+            `;
+        });
+}
+
+async function addComment(postId, text) {
+    let res = await fetch("http://localhost:3000/comments");
+    let allComments = await res.json();
+
+    await fetch("http://localhost:3000/comments", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            id: getNewID(allComments).toString(),
+            postId: postId,
+            text: text,
+            isDeleted: false
+        })
+    });
+
+    loadComments(postId);
+}
+
+async function editComment(id) {
+    let res = await fetch(`http://localhost:3000/comments/${id}`);
+    let comment = await res.json();
+
+    let newText = prompt("Nội dung mới:", comment.text);
+    if (newText === null) return;
+
+    await fetch(`http://localhost:3000/comments/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            ...comment,
+            text: newText
+        })
+    });
+
+    loadComments(comment.postId);
+}
+
+async function deleteComment(id) {
+    let res = await fetch(`http://localhost:3000/comments/${id}`);
+    let comment = await res.json();
+
+    await fetch(`http://localhost:3000/comments/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            ...comment,
+            isDeleted: true
+        })
+    });
+
+    loadComments(comment.postId);
+}
+
+function addCommentFromUI() {
+    let text = document.getElementById("comment_text").value;
+
+    if (!currentPostId) {
+        alert("Vui lòng chọn post trước!");
+        return;
+    }
+
+    if (text.trim() === "") {
+        alert("Comment không được để trống");
+        return;
+    }
+
+    addComment(currentPostId, text);
+    document.getElementById("comment_text").value = "";
+}
+
